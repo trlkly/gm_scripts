@@ -3,7 +3,7 @@
 // @namespace   trlkly
 // @description Scrolls the page all the way to the right. Good for when you zoom in.
 // @exclude     *
-// @version     1
+// @version     1.0
 // @grant       none
 // @run-at      document-start
 // ==/UserScript==
