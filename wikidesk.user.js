@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Wikimedia Wikis - desktop versions
+// @author       BigTSDMB
 // @namespace    BigTSDMB
 // @version      0.3
 // @description  Redirect to the desktop versions of Wikipedia, Wikimedia Commons, and Wiktionary
-// @author       BigTSDMB
+// @license      MIT      
 // @match        *://*.m.wikipedia.org/*
 // @match        *://*.m.wikimedia.org/*
 // @match        *://*.m.wiktionary.org/*
