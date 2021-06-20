@@ -2,7 +2,7 @@
 // @name         Wikimedia Wikis - desktop versions
 // @author       BigTSDMB
 // @namespace    BigTSDMB
-// @version      0.3
+// @version      0.4
 // @description  Redirect to the desktop versions of Wikipedia, Wikimedia Commons, and Wiktionary
 // @license      MIT      
 // @match        *://*.m.wikipedia.org/*
