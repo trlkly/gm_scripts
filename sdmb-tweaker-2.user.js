@@ -4,6 +4,7 @@
 // @version      2.0
 // @description  New tweaks for the new(er) Discourse SDMB
 // @author       BigTSDMB
+// @license      MIT
 // @match        https://boards.straightdope.com/*
 // @grant        none
 // @run-at       document-start
