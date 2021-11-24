@@ -1,10 +1,12 @@
 // ==UserScript==
-// @name         SDMB Tweaker
+// @name         SDMB Tweaker 2
 // @namespace    BigTSDMB
 // @version      2.0
 // @description  New tweaks for the new(er) Discourse SDMB
 // @author       BigTSDMB
 // @license      MIT
+// @updateURL    https://openuserjs.org/meta/BigTSDMB/SDMB_Tweaker_2.meta.js
+// @downloadURL  https://openuserjs.org/install/BigTSDMB/SDMB_Tweaker_2.user.js
 // @match        https://boards.straightdope.com/*
 // @grant        none
 // @run-at       document-start
