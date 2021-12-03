@@ -40,7 +40,7 @@ let style = `
   .cooked :not(.source) > a:not(.mention):visited, aside.onebox .onebox-body a[href]:visited {
      color: var(--success-hover);
   }
-  a:hover {
+  a:hover, .title a:hover {
      text-decoration: underline !important;
   }
   .title a, .menu-panel a:hover {
