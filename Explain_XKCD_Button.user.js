@@ -1,53 +1,73 @@
 // ==UserScript==
 // @id             Explain XKCD Button
 // @name           Explain XKCD Button
-// @icon           http://i.imgur.com/bktNyTc.png
-// @version        1.1.3
+// @license        MIT
+// @icon           data:image/gif;base64,R0lGODlhIAAgAOMPAAACAB4fHSkrKT0/PEpMSVxeXG1vbH6AfZOVkqmrqLe5tszOy9/h3u7x7f3//P///yH5BAEKAA8ALAAAAAAgACAAAAT08EnnELj4Jsq7lxNFZEaQFV7ahcM1KJ0iXLCaPlRxEbYZ2DbGDpi4LICpw6WBvByQHp0B6oR2Ws8mIGt1GLZUcNehFCAbmnHFSFyq0YABUBdgqr9xFZyrbgF4URcMDgtYY35bCg0JIwAoChh8YRkYAgwLGAZ2XZSZDQwmADVjkJRZCzNiao0ZAwylAFNqDkKRiJGzORkNDTq4uZgZCBStBweKvMkLxsYdrFWwndIYm9RYwVsGBbfTAJuhDEqUY+Kb0Z3kF4HT6QAe2C7lXfLOGHIOgvNuOBR4AnZsrBTxFgLWMGIAjlip1QDEgwyDECqEggZEBAA7
+// @version        1.4.0
 // @namespace      http://obskyr.io/
-// @homepageURL    http://obskyr.io/
-// @author         Samuel (@obskyr)
-// @description    Add a link to explainxkcd to each and every XKCD page.
-// @include        /^https?://(www.)?xkcd.com/([0-9]+/)?#?$/
-// @exclude        /^https?://(www.)?xkcd.com/404/?$/
+// @homepageURL    https://openuserjs.org/scripts/BigTSDMB/Explain_XKCD_Button
+// @updateURL      https://openuserjs.org/meta/BigTSDMB/Explain_XKCD_Button.meta.js
+// @author         BigT
+// @description    Add a link to explainxkcd to every XKCD comic page.
+// @match          *://*.xkcd.com/*
 // @run-at         document-start
-// @grant          GM_addStyle
-// @require        https://raw.githubusercontent.com/uzairfarooq/arrive/master/src/arrive.js
+// @grant          none
 // ==/UserScript==
-    var timer // = new Date()
-//trlkly: added #? to @include URL to also cover http://xkcd.com/[number/]#, which occurs if you click Next on the most recent comic.
 
-GM_addStyle (".comicNav { opacity: 0; /*transition: opacity 0.05s ease-out*/ }"); //trlkly: with @run-at document start, this hides buttons until script takes effect
+//var timer = new Date(); //for testing only
 
-//window.addEventListener("DOMContentLoaded", function (){ setTimeout (function() {alert(new Date - timer)}, 0); })
+function addStyle(css) {
+  let style = document.createElement('style');
+  style.innerText = css;
+  if (document.documentElement) {
+    document.documentElement.appendChild(style);
+  }
+  else {
+    let observer = new MutationObserver( () => {
+      if (document.documentElement) {
+        observer.diconnect();
+        document.documentElement.appendChild(style);
+      }
+    }); observer.observe(document, { childList: true });
+  }
+}
 
-document.arrive(".comicNav", {onceOnly: true, existing: true }, function (){ //from @require
-    //trlkly: waits for comicNav to load, since the script now starts before it renders.
-    var comicNumberRe = new RegExp("Permanent link to this comic: http://xkcd.com/([0-9]+)", "g");
-    var middleContainer = document.getElementById("middleContainer");
-    var pageText = middleContainer.textContent || middleContainer.innerText;
-    var comicNumber = comicNumberRe.exec(pageText)[1];
-    
-   
-    //trlkly: getting the title of the comic can break and is unncessary, due to redirects on the wiki. Also .toString is rather slow
-    //var titleDiv = document.getElementById("ctitle");  
-    //var comicTitle = titleDiv.textContent || middleContainer.innerText;
-    var comicNavs = document.getElementsByClassName("comicNav");
-    var explainUrl = "http://www.explainxkcd.com/wiki/index.php/" + comicNumber//.toString() + ":_" + encodeURIComponent(comicTitle.split(" ").join("_"));
+addStyle('.comicNav { visibility: hidden; }');
 
-    for (var i = 0; i < comicNavs.length; i++) {
-        var nav = comicNavs[i];
-        var li = document.createElement("li");
-        var button = document.createElement("a");
-        var buttonText = document.createTextNode("Explain");
-        button.appendChild(buttonText);
-        button.setAttribute("href", explainUrl);
-        button.setAttribute("accesskey", "e"); //trlkly: adds a keyboard shortcut like the other buttons
-        li.appendChild(button);
-        nav.insertBefore(li, nav.children[3]);
-        nav.insertBefore(document.createTextNode("\n"), nav.children[4])
-        nav.style.opacity = "100"; //trlkly: unhides buttons now that script is finished
-    }
-//    timer = new Date();
-    var navButtons = comicNavs[1].getElementsByTagName("a");
-    for (var i = 1; i < navButtons.length; i++) { navButtons[i].setAttribute("accesskey", "") }/**/
-})
+let watcher = new MutationObserver( () => {
+  if (document.getElementsByClassName('comicNav').length == 2) {
+    watcher.disconnect();
+    createButton(); //waits for comicNav to load, since the script now starts before it renders.
+    fixAccess();
+  }
+}); watcher.observe(document, { childList: true, subtree: true });
+
+function createButton() {
+  let middleContainer = document.getElementById('middleContainer');
+  if (!middleContainer) return;
+  let comicNumber = (document.URL + '/').split('/')[3]; //gets comic number from URL
+  if (!comicNumber) { //if fails, try another way to get the current comic number
+    comicNumber = document.querySelector('a[rel="prev"]').href.split('/')[3];
+    comicNumber++;
+  }
+  let explainUrl = 'http://www.explainxkcd.com/wiki/index.php/' + comicNumber;
+  let comicNav = document.getElementsByClassName('comicNav');
+
+  for (let i = 0; i < comicNav.length; i++) {
+    let nav = comicNav[i];
+    if (nav.getElementsByClassName('explainxkcd')[0]) { continue; } //skip if button is already there
+    let li = document.createElement('li');
+    li.innerHTML = '<a href="' + explainUrl + '" class="explainxkcd" accesskey="e">Explain</a>';
+    nav.insertBefore(li, comicNav[i].children[3]);
+    nav.insertBefore(document.createTextNode('\n'), li.nextSibling); //makes spacing the same as other buttons
+  }
+  addStyle('.comicNav { visibility: visible; }'); //unhides buttons now that Explain button is present
+  //console.log(new Date() - timer); //for speed testing only
+}
+
+function fixAccess() { //remove extra access keys so they work instantly without pressing Enter
+  let comicNav = document.getElementsByClassName('comicNav');
+  if (comicNav.length < 2) { return; } //quick and graceful exit if there are no buttons
+  let navButtons = comicNav[1].getElementsByTagName('a');
+  for (let i = 1; i < navButtons.length; i++) { navButtons[i].removeAttribute('accesskey'); }/**/
+}
