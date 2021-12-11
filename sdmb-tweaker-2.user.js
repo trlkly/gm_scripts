@@ -13,25 +13,24 @@
 // ==/UserScript==
 /* jshint esversion: 6 */
 
-function changeStyle(css, id = 'sdmb-tweaker') {
+function changeStyle(css, id) {
   if (!document.documentElement) {
     let observer = new MutationObserver( () => {
       changeStyle(css, id);
       observer.disconnect();
-    } );
-    observer.observe(document, { childList: true } );
+    }); observer.observe(document, { childList: true } );
     return;
   }
   let style = document.getElementById(id);
   if (!style) {
     style = document.createElement('style');
-    style.id = id;
-    let base = document.head || document.documentElement;
-    base.appendChild(style);
+    if (id) { style.id = id; }
+    document.documentElement.appendChild(style);
   }
   style.textContent = css;
 }
 
+let optionsList = JSON.parse(localStorage.getItem('sdmb-tweaker-options') || '{}');
 let style = `
   .cooked a:not(.mention)/*, .d-editor-preview a:not(.mention)*/ {
      text-decoration: underline;
@@ -56,11 +55,14 @@ let style = `
   .MJXc-TeX-sans-R {
      font-family: var(--font-family) !important;
   }
+`;
+if (!optionsList['sticky-avatars']) { style += `
   .topic-post.sticky-avatar .topic-avatar {
      position: unset !important;
   }
-`;
-changeStyle(style);
+`; }
+changeStyle(style, 'sdmb-tweaker');
+
 addEventListener('DOMContentLoaded', () => {
   if (document.querySelector('[data-theme-name="straight dope light"]')) {
     changeStyle(`
@@ -80,7 +82,38 @@ addEventListener('DOMContentLoaded', () => {
     `, 'sdmb-tweaker-Min');
   }
 });
-/*
+
+//add option(s)
+if (location.pathname.endsWith('/preferences/interface') ) {
+  addEventListener('DOMContentLoaded', () => {
+    let observer = new MutationObserver( () => {
+      let fieldset = document.getElementsByTagName('fieldset')[0];
+      if (fieldset) {
+        observer.disconnect();
+        let optionStickyAvatars = document.createElement('div');
+        optionStickyAvatars.innerHTML = `
+          <label class="checkbox-label">
+            <input id="sticky-avatars" type="checkbox"
+              class="ember-checkbox ember-view sdmb-tweaker-setting">
+            Enable sticky avatars
+          </label>
+        `;
+        optionStickyAvatars.className='controls ember-view';
+        fieldset.appendChild(optionStickyAvatars);
+        let optionsList = JSON.parse(localStorage.getItem('sdmb-tweaker-options') || '{}');
+        let settingsList = document.getElementsByClassName('sdmb-tweaker-setting');
+        for (let option of settingsList) {
+          if (optionsList[option.id]) { option.checked = true; }
+          option.addEventListener('change', () => {
+            optionsList[option.id] = option.checked;
+            localStorage.setItem('sdmb-tweaker-options', JSON.stringify(optionsList) );
+          });
+        }
+      }
+    }); observer.observe(document.body, { childList:true, subtree: true });
+  });
+}
+/* apply to all DOM mutations. Hopefully unneeded:
 addEventListener('DOMContentLoaded', () => {
   var observer = new MutationObserver(main_script);
   observer.observe(document, { childList:true, subtree: true });
