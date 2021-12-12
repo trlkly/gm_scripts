@@ -10,25 +10,10 @@
 // @match        https://boards.straightdope.com/*
 // @grant        none
 // @run-at       document-start
+// @require      https://openuserjs.org/src/libs/BigTSDMB/setStyle.js
 // ==/UserScript==
 /* jshint esversion: 6 */
-
-function changeStyle(css, id) {
-  if (!document.documentElement) {
-    let observer = new MutationObserver( () => {
-      changeStyle(css, id);
-      observer.disconnect();
-    }); observer.observe(document, { childList: true } );
-    return;
-  }
-  let style = document.getElementById(id);
-  if (!style) {
-    style = document.createElement('style');
-    if (id) { style.id = id; }
-    document.documentElement.appendChild(style);
-  }
-  style.textContent = css;
-}
+/* globals setStyle */
 
 let optionsList = JSON.parse(localStorage.getItem('sdmb-tweaker-options') || '{}');
 let style = `
@@ -61,11 +46,11 @@ if (!optionsList['sticky-avatars']) { style += `
      position: unset !important;
   }
 `; }
-changeStyle(style, 'sdmb-tweaker');
+setStyle(style, 'sdmb-tweaker');
 
 addEventListener('DOMContentLoaded', () => {
   if (document.querySelector('[data-theme-name="straight dope light"]')) {
-    changeStyle(`
+    setStyle(`
       a, .cooked :not(.source) > a:active:not(.mention), /*aside.onebox .onebox-body a[href],*/
       .cooked :not(.source) > a:hover:not(.mention) {
          color: var(--tertiary-high);
@@ -75,7 +60,7 @@ addEventListener('DOMContentLoaded', () => {
       }
     `, 'sdmb-tweaker-SDL');
   } else if (document.querySelector('[data-theme-name="minima"]')) {
-    changeStyle(`
+    setStyle(`
       .MJXc-TeX-sans-R {
          font-family: sans-serif !important;
       }
