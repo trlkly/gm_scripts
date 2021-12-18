@@ -79,29 +79,32 @@ addEventListener('DOMContentLoaded', () => {
 
 //add option(s)
 if (location.pathname.endsWith('/preferences/interface') ) {
+  let createOptionHTML = optionList => {
+    let output = '<legend class="control-label">SDMB Tweaker</legend>';
+    for (let key in optionList) {
+      output += `
+        <div class="controls sdmb-tweaker-setting">
+          <label class="checkbox-label">
+            <input id="${key}" type="checkbox" class="ember-checkbox">
+            ${optionList[key]}
+          </label>
+        </div>
+      `;
+    };
+    return output;
+  }
   addEventListener('DOMContentLoaded', () => {
     let observer = new MutationObserver( () => {
-      let fieldset = document.getElementsByTagName('fieldset')[0];
+      let fieldset = document.querySelector('fieldset.other');
       if (fieldset) {
         observer.disconnect();
-        let optionStickyAvatars = document.createElement('div');
-        fieldset.appendChild(optionStickyAvatars);
-        optionStickyAvatars.outerHTML = `
-          <div class="controls ember-view">
-            <label class="checkbox-label">
-              <input id="bolder-titles" type="checkbox"
-                class="ember-checkbox ember-view sdmb-tweaker-setting">
-              Make unread thread titles more bold
-            </label>
-          </div>
-          <div class="controls ember-view">
-            <label class="checkbox-label">
-              <input id="sticky-avatars" type="checkbox"
-                class="ember-checkbox ember-view sdmb-tweaker-setting">
-              Enable sticky avatars
-            </label>
-          </div>
-        `;
+        let additionalOptions = document.createElement('fieldset');
+        additionalOptions.className = 'control-group sdmb-tweaker-preferences';
+        fieldset.after(additionalOptions);
+        additionalOptions.innerHTML = createOptionHTML({
+          'bolder-titles': 'Make unread thread titles more bold',
+          'sticky-avatars': 'Enable sticky avatars',
+        });
         let optionsList = JSON.parse(localStorage.getItem('sdmb-tweaker-options') || '{}');
         let settingsList = document.getElementsByClassName('sdmb-tweaker-setting');
         for (let option of settingsList) {
