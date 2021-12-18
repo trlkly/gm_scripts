@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SDMB Tweaker 2
 // @namespace    BigTSDMB
-// @version      2.1
+// @version      2.1.1
 // @description  New tweaks for the new(er) Discourse SDMB
 // @author       BigTSDMB
 // @updateURL    https://openuserjs.org/meta/BigTSDMB/SDMB_Tweaker_2.meta.js
@@ -83,9 +83,9 @@ if (location.pathname.endsWith('/preferences/interface') ) {
     let output = '<legend class="control-label">SDMB Tweaker</legend>';
     for (let key in optionList) {
       output += `
-        <div class="controls sdmb-tweaker-setting">
+        <div class="controls">
           <label class="checkbox-label">
-            <input id="${key}" type="checkbox" class="ember-checkbox">
+            <input id="${key}" type="checkbox" class="ember-checkbox sdmb-tweaker-setting">
             ${optionList[key]}
           </label>
         </div>
