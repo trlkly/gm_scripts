@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SDMB Tweaker 2
 // @namespace    BigTSDMB
-// @version      2.0
+// @version      2.1
 // @description  New tweaks for the new(er) Discourse SDMB
 // @author       BigTSDMB
 // @updateURL    https://openuserjs.org/meta/BigTSDMB/SDMB_Tweaker_2.meta.js
@@ -46,6 +46,15 @@ if (!optionsList['sticky-avatars']) { style += `
      position: unset !important;
   }
 `; }
+
+if (optionsList['bolder-titles']) { style +=`
+  .topic-list .main-link a.title {
+     font-weight: bold;
+  }
+  .visited .main-link a.title {
+     font-weight: normal;
+  }
+`; }
 setStyle(style, 'sdmb-tweaker');
 
 addEventListener('DOMContentLoaded', () => {
@@ -76,15 +85,23 @@ if (location.pathname.endsWith('/preferences/interface') ) {
       if (fieldset) {
         observer.disconnect();
         let optionStickyAvatars = document.createElement('div');
-        optionStickyAvatars.innerHTML = `
-          <label class="checkbox-label">
-            <input id="sticky-avatars" type="checkbox"
-              class="ember-checkbox ember-view sdmb-tweaker-setting">
-            Enable sticky avatars
-          </label>
-        `;
-        optionStickyAvatars.className='controls ember-view';
         fieldset.appendChild(optionStickyAvatars);
+        optionStickyAvatars.outerHTML = `
+          <div class="controls ember-view">
+            <label class="checkbox-label">
+              <input id="bolder-titles" type="checkbox"
+                class="ember-checkbox ember-view sdmb-tweaker-setting">
+              Make unread thread titles more bold
+            </label>
+          </div>
+          <div class="controls ember-view">
+            <label class="checkbox-label">
+              <input id="sticky-avatars" type="checkbox"
+                class="ember-checkbox ember-view sdmb-tweaker-setting">
+              Enable sticky avatars
+            </label>
+          </div>
+        `;
         let optionsList = JSON.parse(localStorage.getItem('sdmb-tweaker-options') || '{}');
         let settingsList = document.getElementsByClassName('sdmb-tweaker-setting');
         for (let option of settingsList) {
