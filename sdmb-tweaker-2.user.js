@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SDMB Tweaker 2
 // @namespace    BigTSDMB
-// @version      2.1.2
+// @version      2.1.3
 // @description  New tweaks for the new(er) Discourse SDMB
 // @author       BigTSDMB
 // @updateURL    https://openuserjs.org/meta/BigTSDMB/SDMB_Tweaker_2.meta.js
@@ -78,11 +78,11 @@ addEventListener('DOMContentLoaded', () => {
 });
 
 //add option(s)
-if (location.pathname.indexOf('/preferences/') != -1) {
-  let createOptionHTML = optionList => {
-    let output = '<legend class="control-label">SDMB Tweaker</legend>';
-    for (let key in optionList) {
-      output += `
+
+function createOptionHTML(optionList) {
+  let output = '<legend class="control-label">SDMB Tweaker</legend>';
+  for (let key in optionList) {
+    output += `
         <div class="controls">
           <label class="checkbox-label">
             <input id="${key}" type="checkbox" class="ember-checkbox sdmb-tweaker-setting">
@@ -90,35 +90,43 @@ if (location.pathname.indexOf('/preferences/') != -1) {
           </label>
         </div>
       `;
-    };
-    return output;
-  }
-  let addOptions = () => {
-    let observer = new MutationObserver( () => {
-      let fieldset = document.querySelector('fieldset.other');
-      if (fieldset) {
-        observer.disconnect();
-        let additionalOptions = document.createElement('fieldset');
-        additionalOptions.className = 'control-group sdmb-tweaker-preferences';
-        fieldset.after(additionalOptions);
-        additionalOptions.innerHTML = createOptionHTML({
-          'bolder-titles': 'Make unread thread titles more bold',
-          'sticky-avatars': 'Enable sticky avatars',
-        });
-        let optionsList = JSON.parse(localStorage.getItem('sdmb-tweaker-options') || '{}');
-        let settingsList = document.getElementsByClassName('sdmb-tweaker-setting');
-        for (let option of settingsList) {
-          if (optionsList[option.id]) { option.checked = true; }
-          option.addEventListener('change', () => {
-            optionsList[option.id] = option.checked;
-            localStorage.setItem('sdmb-tweaker-options', JSON.stringify(optionsList) );
-          });
-        }
-      }
-    }); observer.observe(document.body, { childList:true, subtree: true });
-  }
-  addEventListener('DOMContentLoaded', addOptions);
+  };
+  return output;
 }
+function addOptions() {
+  let observer = new MutationObserver( () => {
+    if (document.querySelector('fieldset.sdmb-tweaker-preferences')) { return; }
+    let fieldset = document.querySelector('fieldset.other');
+    if (fieldset) {
+      observer.disconnect();
+      let additionalOptions = document.createElement('fieldset');
+      additionalOptions.className = 'control-group sdmb-tweaker-preferences';
+      fieldset.after(additionalOptions);
+      additionalOptions.innerHTML = createOptionHTML({
+        'bolder-titles': 'Make unread thread titles more bold',
+        'sticky-avatars': 'Enable sticky avatars',
+      });
+      let optionsList = JSON.parse(localStorage.getItem('sdmb-tweaker-options') || '{}');
+      let settingsList = document.getElementsByClassName('sdmb-tweaker-setting');
+      for (let option of settingsList) {
+        if (optionsList[option.id]) { option.checked = true; }
+        option.addEventListener('change', () => {
+          optionsList[option.id] = option.checked;
+          localStorage.setItem('sdmb-tweaker-options', JSON.stringify(optionsList) );
+        });
+      }
+    }
+  }); observer.observe(document.body, { childList:true, subtree: true });
+}
+if (location.href.endsWith('/interface')) { addEventListener('DOMContentLoaded', addOptions); }
+addEventListener('popstate', addOptions); //detects back/forward buttons
+window.history.pushState = new Proxy(window.history.pushState, { //detects URL changes
+  apply: (target, thisArg, argArray) => {
+    addOptions();
+    return target.apply(thisArg, argArray);
+  },
+});
+
 /* apply to all DOM mutations. Hopefully unneeded:
 addEventListener('DOMContentLoaded', () => {
   var observer = new MutationObserver(main_script);
