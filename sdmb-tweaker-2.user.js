@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SDMB Tweaker 2
 // @namespace    BigTSDMB
-// @version      2.1.1
+// @version      2.1.2
 // @description  New tweaks for the new(er) Discourse SDMB
 // @author       BigTSDMB
 // @updateURL    https://openuserjs.org/meta/BigTSDMB/SDMB_Tweaker_2.meta.js
@@ -78,7 +78,7 @@ addEventListener('DOMContentLoaded', () => {
 });
 
 //add option(s)
-if (location.pathname.endsWith('/preferences/interface') ) {
+if (location.pathname.indexOf('/preferences/') != -1) {
   let createOptionHTML = optionList => {
     let output = '<legend class="control-label">SDMB Tweaker</legend>';
     for (let key in optionList) {
@@ -93,7 +93,7 @@ if (location.pathname.endsWith('/preferences/interface') ) {
     };
     return output;
   }
-  addEventListener('DOMContentLoaded', () => {
+  let addOptions = () => {
     let observer = new MutationObserver( () => {
       let fieldset = document.querySelector('fieldset.other');
       if (fieldset) {
@@ -116,7 +116,8 @@ if (location.pathname.endsWith('/preferences/interface') ) {
         }
       }
     }); observer.observe(document.body, { childList:true, subtree: true });
-  });
+  }
+  addEventListener('DOMContentLoaded', addOptions);
 }
 /* apply to all DOM mutations. Hopefully unneeded:
 addEventListener('DOMContentLoaded', () => {
